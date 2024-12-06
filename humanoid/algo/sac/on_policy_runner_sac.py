@@ -72,8 +72,8 @@ class SACOnPolicyRunner:
         self.alg: SAC = alg_class(actor_critic, device=self.device, **self.alg_cfg)
         self.num_steps_per_env = self.cfg["num_steps_per_env"]
         self.save_interval = self.cfg["save_interval"]
-        self.curriculum_scales_interval = self.cfg["curriculum_scales_interval"]
-        self.project_name = train_cfg["project_name"]
+        # self.curriculum_scales_interval = self.cfg["curriculum_scales_interval"]
+        # self.project_name = train_cfg["project_name"]
 
         # init storage and model
         self.alg.init_storage(
@@ -97,7 +97,7 @@ class SACOnPolicyRunner:
         # initialize writer
         if self.log_dir is not None and self.writer is None:
             wandb.init(
-                project=self.project_name,
+                project='sac',
                 sync_tensorboard=True,
                 name=self.wandb_run_name,
                 config=self.all_cfg,
@@ -170,8 +170,8 @@ class SACOnPolicyRunner:
             if it % self.save_interval == 0:
                 self.save(os.path.join(self.log_dir, "model_{}.pt".format(it)))
 
-            if it % self.curriculum_scales_interval == 0:
-                self.env.update_curriculum_scales()
+            # if it % self.curriculum_scales_interval == 0:
+            #     self.env.update_curriculum_scales()
 
             ep_infos.clear()
 
