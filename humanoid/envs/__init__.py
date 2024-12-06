@@ -39,4 +39,4 @@ from .custom.humanoid_env import XBotLFreeEnv
 from humanoid.utils.task_registry import task_registry
 
 
-task_registry.register( "humanoid_ppo", XBotLFreeEnv, XBotLCfg(), XBotLCfgPPO() )
+task_registry.register( "ppo", XBotLFreeEnv, XBotLCfg(), XBotLCfgPPO() )
