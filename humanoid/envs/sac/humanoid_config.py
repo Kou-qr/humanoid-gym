@@ -254,7 +254,7 @@ class XBotLCfgPPO(LeggedRobotCfgPPO):
         # schedule = 'adaptive' # could be adaptive, fixed
         # desired_kl = 0.01
         # max_grad_norm = 1.
-        tau=0.005
+        tau=0.1
         initial_alpha=1
 
     class runner:
@@ -266,7 +266,7 @@ class XBotLCfgPPO(LeggedRobotCfgPPO):
         # logging
         save_interval = 100  # Please check for potential savings every `save_interval` iterations.
         experiment_name = 'sac'
-        run_name = ''
+        run_name = 'lr111-4_tau0.2_alpha1_'
         # Load and resume
         resume = False
         load_run = -1  # -1 = last run

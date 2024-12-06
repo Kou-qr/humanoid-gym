@@ -33,6 +33,7 @@
 import os
 from typing import Tuple
 from datetime import datetime
+from shutil import copyfile
 
 from humanoid.algo import VecEnv
 from humanoid.algo import OnPolicyRunner
@@ -62,6 +63,26 @@ class TaskRegistry():
         # copy seed
         env_cfg.seed = train_cfg.seed
         return env_cfg, train_cfg
+
+    def save_config(self, name, log_dir):
+        try:
+            # name是算法的名字, 在__init__.py下定义。例如: humanoid_ppo, humanoid_aumoral
+            # 获取name的前缀（不包含后缀）
+            # prefix = name.split('_')[0]
+
+            # 遍历 LEGGED_GYM_ENVS_DIR/prefix/ 目录下的所有文件和子目录
+            # 例如: LEGGED_GYM_ENVS_DIR/humanoid/
+            for root, dirs, files in os.walk(os.path.join(LEGGED_GYM_ENVS_DIR, name)):
+                for file in files:
+                    if file.endswith(('.py', '.yaml', '.json')):
+                        source_item = os.path.join(root, file)
+                        target_item = os.path.join(log_dir, file)
+                        os.makedirs(log_dir, exist_ok=True)
+                        copyfile(source_item, target_item)
+        except FileNotFoundError as e:
+            print(f"File not found: {e}")
+        except Exception as e:
+            print(f"An error occurred while saving config for {name} in {log_dir}: {e}")
     
     def make_env(self, name, args=None, env_cfg=None) -> Tuple[VecEnv, LeggedRobotCfg]:
         """ Creates an environment either from a registered namme or from the provided config file.
@@ -158,6 +179,9 @@ class TaskRegistry():
             resume_path = get_load_path(log_root, load_run=train_cfg.runner.load_run, checkpoint=train_cfg.runner.checkpoint)
             print(f"Loading model from: {resume_path}")
             runner.load(resume_path, load_optimizer=False)
+        else:
+            # save config only when first training, maybe need to comment when play......
+            self.save_config(name, log_dir)
         return runner, train_cfg
 
 # make global task registry
