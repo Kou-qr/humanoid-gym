@@ -12,12 +12,18 @@ class ActorSAC(nn.Module):
                  actor_hidden_dims=[256, 256],
                  activation=nn.ReLU(),
                  max_action=1.0,
+                 log_std_init = 1.0,
+                 log_std_max = 4.0,
+                 log_std_min = -20.0,
                  **kwargs):
         if kwargs:
             print("ActorSAC.__init__ got unexpected arguments, which will be ignored: " + str([key for key in kwargs.keys()]))
         super(ActorSAC, self).__init__()
 
         self.max_action = max_action
+        self.log_std_init = log_std_init
+        self.log_std_max = log_std_max
+        self.log_std_min = log_std_min
 
         # Actor network
         actor_layers = []
@@ -34,7 +40,7 @@ class ActorSAC(nn.Module):
         #actor network
         self.mu = nn.Linear(actor_hidden_dims[-1], num_actions)  # Mean μ layer
         self.log_std = nn.Linear(actor_hidden_dims[-1], num_actions)  # std
-        self.std = nn.Linear(actor_hidden_dims[-1], num_actions)  # std
+        # self.std = nn.Linear(actor_hidden_dims[-1], num_actions)  # std
 
         # Action noise
         self.noise_distribution = None
@@ -42,7 +48,9 @@ class ActorSAC(nn.Module):
     def forward(self,observations):
         x = self.adaptor(observations)
         mu=self.mu(x)
-        std=F.softplus(self.std(x))
+        # std=F.softplus(self.std(x))
+        log_std = (self.log_std_init + self.log_std(x)).clamp(self.log_std_min, self.log_std_max)
+        std = log_std.exp()
         return mu, std
     def act(self, observations, **kwargs):
         self.update_distribution(observations)
@@ -140,6 +148,9 @@ class ActorCriticSAC(nn.Module):
                         critic_hidden_dims=[256, 256, 256],
                         activation = nn.ELU(),
                         max_action = 1.0,
+                        log_std_init = 1.0,
+                        log_std_max = 4.0,
+                        log_std_min = -20.0,
                         **kwargs):
         if kwargs:
             print("ActorCriticSAC.__init__ got unexpected arguments, which will be ignored: " + str([key for key in kwargs.keys()]))
@@ -153,6 +164,9 @@ class ActorCriticSAC(nn.Module):
                     actor_hidden_dims=actor_hidden_dims,
                     activation=activation,
                     max_action=max_action,
+                    log_std_init=log_std_init,
+                    log_std_max=log_std_max,
+                    log_std_min=log_std_min,
         )
         self.critic = CriticSAC(
                  num_critic_obs=num_critic_obs,
